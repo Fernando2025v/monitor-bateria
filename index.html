@@ -1,1 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor de Bateria & Clima - Painel de Controle</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 15px rgba(6, 182, 212, 0.4); }
+            50% { box-shadow: 0 0 30px rgba(6, 182, 212, 0.8); }
+        }
+        .glow-box { animation: pulse-glow 3s infinite; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans flex flex-col justify-between p-4 md:p-8">
 
+    <!-- Header -->
+    <header class="text-center mb-6">
+        <h1 class="text-2xl md:text-4xl font-light tracking-wider uppercase text-slate-200">Sistema de Monitoramento</h1>
+        <p class="text-xs md:text-sm text-cyan-400 mt-1 tracking-wide">Automação de Voz Inteligente & Clima Integrado</p>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-6xl w-full mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        
+        <!-- Card 1: Bateria -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between glow-box relative">
+            <div class="absolute top-4 right-4 w-3 h-3 rounded-full bg-emerald-500" id="statusDot"></div>
+            
+            <div class="flex flex-col items-center justify-center my-4">
+                <!-- Circular Progress Simulated -->
+                <div class="relative w-36 h-36 flex items-center justify-center rounded-full border-4 border-cyan-500 shadow-lg shadow-cyan-500/20">
+                    <span class="text-4xl font-bold" id="batteryLevelText">--%</span>
+                </div>
+            </div>
+
+            <div>
+                <p class="text-lg font-semibold text-emerald-400 mb-1" id="chargingStatusText">Detectando bateria...</p>
+                <p class="text-xs text-slate-400" id="voiceStatusText">Voz: Ativada Repetição Automática</p>
+            </div>
+        </div>
+
+        <!-- Card 2: Eletrocardiograma Térmico -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between">
+            <div class="flex justify-between items-center">
+                <h3 class="text-rose-400 font-medium">Eletrocardiograma Térmico</h3>
+                <div class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></div>
+            </div>
+            <div class="bg-slate-950/60 rounded-xl h-36 flex items-center justify-center p-2 my-4 border border-slate-800/50">
+                <!-- Simulated ECG Wave -->
+                <svg class="w-full h-full text-rose-500" viewBox="0 0 300 100" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M0 50 H50 L60 20 L70 80 L80 40 L90 60 H130 L140 10 L150 90 L160 50 H300" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <p class="text-xs text-slate-500">Monitoramento contínuo de estabilidade</p>
+        </div>
+
+        <!-- Card 3: Clima & Métricas -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between">
+            <div class="flex justify-between items-center">
+                <h3 class="text-amber-400 font-medium">Métricas & Central de Clima</h3>
+                <div class="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
+            </div>
+            
+            <div class="space-y-3 my-2">
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-slate-400">Núcleo da CPU:</span>
+                    <span class="text-amber-400 font-bold flex items-center gap-1">🔥 41°C</span>
+                </div>
+                <div class="bg-amber-500/10 border border-amber-500/20 rounded px-2 py-1 text-center">
+                    <span class="text-xs text-amber-300 font-semibold uppercase tracking-wider">Nível Elevado</span>
+                </div>
+                <div class="flex justify-between items-center text-sm pt-2 border-t border-slate-800">
+                    <span class="text-slate-400">Clima Ext:</span>
+                    <span class="text-cyan-400 font-bold">🌍 24°C</span>
+                </div>
+                <div class="flex justify-between items-center text-xs text-slate-400">
+                    <span>Hoje (Máx/Mín):</span>
+                    <span>31°C / 20°C</span>
+                </div>
+                <div class="flex justify-between items-center text-xs text-slate-400">
+                    <span>Amanhã (Máx/Mín):</span>
+                    <span>32°C / 20°C</span>
+                </div>
+            </div>
+
+            <div class="text-xs text-slate-500 pt-2 border-t border-slate-800 flex justify-between">
+                <span>Conexão: 4G (10 Mbps)</span>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Painel de Controle / Teste Manual (Útil para celular/PC) -->
+    <footer class="max-w-6xl w-full mx-auto bg-slate-900/50 border border-slate-800/80 rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+        <div>
+            <p>💡 <span class="text-slate-300 font-semibold">Dica:</span> Toque em qualquer lugar da tela para liberar a voz no celular.</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <span id="simulatorLabel" class="text-cyan-400">Modo API Nativo Ativo</span>
+            <button onclick="toggleTestMode()" id="testModeBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 transition">
+                Simular Carregamento
+            </button>
+        </div>
+    </footer>
+
+    <script>
+        let speechSynth = window.speechSynthesis;
+        let isSimulated = false;
+        let simulatedLevel = 50;
+        let simulatedCharging = false;
+
+        // Flags para controle inteligente das repetições
+        let alertInterval = null;
+
+        function speak(text) {
+            if (!speechSynth) return;
+            // Cancela falas anteriores para não embolar o áudio
+            speechSynth.cancel();
+            let utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'pt-BR';
+            utterance.rate = 1.0;
+            speechSynth.speak(utterance);
+        }
+
+        function startRepeatingAlert(message, intervalMs = 20000) {
+            if (alertInterval) return; // Se já estiver rodando, não duplica
+            // Fala na hora
+            speak(message);
+            // Repete a cada intervalo (ex: 20 segundos) até ser limpo
+            alertInterval = setInterval(() => {
+                speak(message);
+            }, intervalMs);
+        }
+
+        function stopRepeatingAlert() {
+            if (alertInterval) {
+                clearInterval(alertInterval);
+                alertInterval = null;
+            }
+        }
+
+        function checkBatteryState(level, charging) {
+            const levelText = document.getElementById('batteryLevelText');
+            const statusText = document.getElementById('chargingStatusText');
+            const statusDot = document.getElementById('statusDot');
+
+            levelText.innerText = level + '%';
+
+            if (charging) {
+                statusDot.className = "absolute top-4 right-4 w-3 h-3 rounded-full bg-emerald-500 animate-pulse";
+                
+                if (level >= 100) {
+                    statusText.innerText = "Alimentação: 100% - Desconecte o Cabo!";
+                    statusText.className = "text-lg font-semibold text-rose-400 mb-1";
+                    // Fica chamando repetidamente ATÉ desconectar o cabo
+                    startRepeatingAlert("Bateria carregada em 100 porcento. Por favor, desconecte o cabo de carregamento.", 15000);
+                } else {
+                    statusText.innerText = "Alimentação: Cabo Conectado (" + level + "%)";
+                    statusText.className = "text-lg font-semibold text-emerald-400 mb-1";
+                    // Para qualquer alarme pendente, pois já conectou e está carregando normalmente
+                    stopRepeatingAlert();
+                }
+            } else {
+                statusDot.className = "absolute top-4 right-4 w-3 h-3 rounded-full bg-amber-500";
+                statusText.innerText = "Alimentação: Rodando na Bateria";
+                statusText.className = "text-lg font-semibold text-amber-400 mb-1";
+                
+                // Se estiver sem cabo e bateria abaixo de 30% (ou simulando), fica chamando para conectar
+                if (level <= 30) {
+                    startRepeatingAlert("Atenção! Conecte o cabo de carregamento.", 20000);
+                } else {
+                    stopRepeatingAlert();
+                }
+            }
+        }
+
+        // Leitura real da bateria do dispositivo (PC / Celular compatível)
+        if ('getBattery' in navigator) {
+            navigator.getBattery().then(battery => {
+                function updateBattery() {
+                    if (!isSimulated) {
+                        let level = Math.round(battery.level * 100);
+                        let charging = battery.charging;
+                        checkBatteryState(level, charging);
+                    }
+                }
+                updateBattery();
+                battery.addEventListener('levelchange', updateBattery);
+                battery.addEventListener('chargingchange', updateBattery);
+            });
+        } else {
+            // Fallback se o navegador não suportar a API de bateria nativa
+            checkBatteryState(simulatedLevel, simulatedCharging);
+        }
+
+        // Botão para simular os estados na tela (ótimo para testes manuais)
+        function toggleTestMode() {
+            isSimulated = true;
+            document.getElementById('simulatorLabel').innerText = "Modo Simulação Ativo";
+            
+            if (!simulatedCharging) {
+                // Simula conectar o cabo a 90%
+                simulatedCharging = true;
+                simulatedLevel = 90;
+                speak("Cabo conectado.");
+            } else if (simulatedLevel < 100) {
+                // Simula chegar a 100%
+                simulatedLevel = 100;
+            } else {
+                // Reseta para testar de novo
+                simulatedCharging = false;
+                simulatedLevel = 25;
+                speak("Cabo desconectado.");
+            }
+            checkBatteryState(simulatedLevel, simulatedCharging);
+        }
+
+        // Garante ativação de áudio por clique do usuário (exigência de celulares)
+        document.body.addEventListener('click', () => {
+            if (speechSynth && speechSynth.paused) {
+                speechSynth.resume();
+            }
+        }, { once: true });
+    </script>
+</body>
+</html>
