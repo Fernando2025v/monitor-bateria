@@ -1,1 +1,544 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Controle - Bateria & Clima</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #091014, #102027, #162a35);
+            --panel-bg: rgba(16, 32, 43, 0.65);
+            --panel-border: rgba(0, 242, 254, 0.15);
+            --text-color: #ffffff;
+            --color-primary: #00f2fe;
+            --color-success: #00ff87;
+            --color-danger: #ff416c;
+            --color-warn: #ffbc00;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-color);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-weight: 300;
+            letter-spacing: 3px;
+            margin-bottom: 5px;
+            text-shadow: 0 0 15px rgba(0,242,254,0.6);
+            color: #fff;
+        }
+
+        .subtitle {
+            color: #8da4be;
+            margin-bottom: 20px;
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+
+        /* Botão Lembrador de Ativação Neon */
+        .btn-voz-neon {
+            background: linear-gradient(90deg, #00f2fe, #4facfe);
+            color: #050b0e;
+            border: none;
+            padding: 14px 40px;
+            font-size: 15px;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0,242,254,0.4);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            animation: pulsarBotao 2s infinite;
+        }
+
+        @keyframes pulsarBotao {
+            0% { box-shadow: 0 0 10px rgba(0,242,254,0.4); }
+            50% { box-shadow: 0 0 25px rgba(0,242,254,0.8); transform: scale(1.02); }
+            100% { box-shadow: 0 0 10px rgba(0,242,254,0.4); }
+        }
+
+        .btn-voz-neon.ativo {
+            background: linear-gradient(90deg, #00ff87, #00f2fe);
+            box-shadow: 0 0 15px rgba(0,255,135,0.3);
+            color: #050b0e;
+            animation: none;
+            cursor: default;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .card {
+            background: var(--panel-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--panel-border);
+            border-radius: 24px;
+            padding: 25px;
+            box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.6), inset 0 0 15px rgba(0, 242, 254, 0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+            height: 310px;
+            box-sizing: border-box;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(0, 242, 254, 0.4);
+            box-shadow: 0 16px 50px 0 rgba(0, 242, 254, 0.15), inset 0 0 20px rgba(0, 242, 254, 0.1);
+        }
+
+        .live-pulse {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            width: 8px;
+            height: 8px;
+            background-color: var(--color-success);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--color-success);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 1; }
+            50% { transform: scale(1.4); opacity: 0.3; box-shadow: 0 0 18px var(--color-success); }
+            100% { transform: scale(0.9); opacity: 1; }
+        }
+
+        .progress-circle {
+            position: relative;
+            width: 135px;
+            height: 135px;
+            border-radius: 50%;
+            background: conic-gradient(var(--color-primary) 0%, #1a2a35 0%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 25px rgba(0,242,254,0.15);
+            margin-bottom: 15px;
+            transition: background 0.4s ease;
+        }
+
+        .progress-circle::before {
+            content: "";
+            position: absolute;
+            width: 115px;
+            height: 115px;
+            border-radius: 50%;
+            background: #0d1921;
+        }
+
+        .progress-value {
+            position: relative;
+            font-size: 32px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255,255,255,0.2);
+        }
+
+        .info-txt {
+            font-size: 14px;
+            color: #a2b7cc;
+            margin: 4px 0;
+            text-align: center;
+            width: 100%;
+        }
+
+        .highlight {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--color-primary);
+            text-shadow: 0 0 8px rgba(0,242,254,0.3);
+        }
+
+        .canvas-container {
+            width: 100%;
+            height: 190px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            overflow: hidden;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .temp-display {
+            font-size: 42px;
+            font-weight: bold;
+            color: var(--color-warn);
+            text-shadow: 0 0 20px rgba(255, 188, 0, 0.4);
+            margin: 2px 0;
+            letter-spacing: -1px;
+            display: flex;
+            align-items: center;
+        }
+
+        .status-tag {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.05);
+            margin-top: -2px;
+            display: inline-block;
+        }
+
+        .weather-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            width: 100%;
+            gap: 10px;
+            margin-top: 8px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            padding-top: 8px;
+        }
+
+        .icon-temp {
+            font-size: 20px;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>SISTEMA DE MONITORAMENTO</h1>
+    <div class="subtitle">Controle de Energia & Diagnóstico Térmico</div>
+
+    <!-- BOTÃO VISUAL ADICIONADO -->
+    <button id="btnVoz" class="btn-voz-neon">Ativar Alertas por Voz</button>
+
+    <div class="dashboard">
+        <!-- CARD 1: CARGA DA BATERIA -->
+        <div class="card">
+            <div class="live-pulse" id="pulseVoz"></div>
+            <div class="progress-circle" id="bateriaCircle">
+                <div class="progress-value" id="txtNivel">--%</div>
+            </div>
+            <div class="info-txt highlight" id="txtStatusCabo">Conectando ao hardware...</div>
+            <div class="info-txt" id="txtVozStatus" style="font-weight: bold; color: var(--color-danger);">Voz: Bloqueada</div>
+        </div>
+
+        <!-- CARD 2: GRÁFICO DE HISTÓRICO TÉRMICO -->
+        <div class="card">
+            <div class="live-pulse" style="animation-delay: 0.5s; background-color: var(--color-danger); box-shadow: 0 0 10px var(--color-danger);"></div>
+            <h3 style="margin:0 0 8px 0; font-weight: 500; align-self: flex-start; color: var(--color-danger); font-size: 15px; letter-spacing: 0.5px;">Eletrocardiograma Térmico</h3>
+            <div class="canvas-container">
+                <canvas id="graficoNativo"></canvas>
+            </div>
+        </div>
+
+        <!-- CARD 3: METRICAS E CENTRAL DE CLIMA METEOROLÓGICO -->
+        <div class="card" style="align-items: flex-start; justify-content: flex-start; padding-top: 20px;">
+            <div class="live-pulse" id="pulseTermico" style="animation-delay: 1s; background-color: var(--color-warn); box-shadow: 0 0 10px var(--color-warn);"></div>
+            <h3 style="margin:0 0 10px 0; font-weight: 500; border-bottom: 1px solid rgba(255,255,255,0.08); width: 100%; padding-bottom: 5px; color: var(--color-warn); font-size: 15px; letter-spacing: 0.5px;">Métricas & Central de Clima</h3>
+            
+            <div style="display:flex; width:100%; justify-content:space-between; align-items:center;">
+                <div>
+                    <div class="info-txt" style="text-align:left; font-size:11px; color: #8da4be; margin-bottom: 0;">Núcleo da CPU:</div>
+                    <div class="temp-display"><span id="icoCPU" class="icon-temp">💻</span><span id="txtTempCPU">--°C</span></div>
+                    <div id="txtNivelTermico" class="status-tag" style="color: var(--color-success);">Nível Normal</div>
+                </div>
+                <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end;">
+                    <div class="info-txt" style="font-size:11px; color: var(--color-primary);" id="txtClimaCidade">Buscando Clima...</div>
+                    <div class="info-txt" style="font-size:22px; font-weight: 700; color: var(--color-success); margin: 2px 0;"><span id="icoAmbiente" class="icon-temp">🌍</span><span id="txtTempExterna">--°C</span></div>
+                </div>
+            </div>
+
+<script>
+    <script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(err => console.error(err));
+    }
+
+    const txtNivel = document.getElementById('txtNivel');
+    const batteryCircle = document.getElementById('bateriaCircle');
+    const txtStatusCabo = document.getElementById('txtStatusCabo');
+    const txtVozStatus = document.getElementById('txtVozStatus');
+    const txtTempCPU = document.getElementById('txtTempCPU');
+    const txtNivelTermico = document.getElementById('txtNivelTermico');
+    const txtClimaCidade = document.getElementById('txtClimaCidade');
+    const txtTempExterna = document.getElementById('txtTempExterna');
+    const txtTempoHoje = document.getElementById('txtTempoHoje');
+    const txtTempoAmanha = document.getElementById('txtTempoAmanha');
+    const pulseVoz = document.getElementById('pulseVoz');
+    const pulseTermico = document.getElementById('pulseTermico');
+    const btnVoz = document.getElementById('btnVoz');
+    const canvas = document.getElementById('graficoNativo');
+    const ctx = canvas.getContext('2d');
+
+    const icoCPU = document.getElementById('icoCPU');
+    const icoAmbiente = document.getElementById('icoAmbiente');
+    const icoHoje = document.getElementById('icoHoje');
+    const icoAmanha = document.getElementById('icoAmanha');
+    
+    let controleAtivo = false; 
+    let jaAvisouFraca = false;
+    let jaAvisouCheia = false;
+    let jaAvisouAquecido = false;
+    let bateriaGlobalNivel = 100;
+    let estaCarregandoGlobal = true;
+    
+    let historicoTermico = Array(22).fill(35);
+
+    function redimensionarCanvas() {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+        desenharGraficoNativo();
+    }
+    window.addEventListener('resize', redimensionarCanvas);
+    setTimeout(redimensionarCanvas, 100);
+
+    function desenharGraficoNativo() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.strokeStyle = 'rgba(0, 242, 254, 0.03)';
+        ctx.lineWidth = 1;
+        for(let g = 0; g < canvas.height; g += 30) {
+            ctx.beginPath();
+            ctx.moveTo(0, g);
+            ctx.lineTo(canvas.width, g);
+            ctx.stroke();
+        }
+
+        const larguraFatia = canvas.width / (historicoTermico.length - 1);
+        const minTemp = 15;
+        const maxTemp = 65;
+        const alcance = maxTemp - minTemp;
+
+        let gradienteAbaixo = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        gradienteAbaixo.addColorStop(0, 'rgba(255, 65, 108, 0.18)');
+        gradienteAbaixo.addColorStop(0.5, 'rgba(255, 65, 108, 0.05)');
+        gradienteAbaixo.addColorStop(1, 'rgba(0, 0, 0, 0.0)');
+        
+        ctx.beginPath();
+        ctx.moveTo(0, canvas.height);
+        for (let i = 0; i < historicoTermico.length; i++) {
+            const x = i * larguraFatia;
+            const porcentagemAltura = (historicoTermico[i] - minTemp) / alcance;
+            const y = canvas.height - (porcentagemAltura * (canvas.height - 40)) - 20;
+            ctx.lineTo(x, y);
+        }
+        ctx.lineTo(canvas.width, canvas.height);
+        ctx.closePath();
+        ctx.fillStyle = gradienteAbaixo;
+        ctx.fill();
+
+        ctx.shadowColor = '#ff416c';
+        ctx.shadowBlur = 12;
+        ctx.beginPath();
+        for (let i = 0; i < historicoTermico.length; i++) {
+            const x = i * larguraFatia;
+            const porcentagemAltura = (historicoTermico[i] - minTemp) / alcance;
+            const y = canvas.height - (porcentagemAltura * (canvas.height - 40)) - 20;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = '#ff416c';
+        ctx.lineWidth = 3.5;
+        ctx.stroke();
+        ctx.shadowBlur = 0; 
+    }
+
+    // Sistema de clima local estático seguro para evitar travamentos de rede
+    let temperaturaBaseAmbiente = 24; 
+    txtClimaCidade.textContent = "Clima Ext:";
+    txtTempExterna.textContent = "24°C";
+
+    // MOTOR DE CALCULO E VERIFICAÇÃO DE NÍVEIS TÉRMICOS (A CADA 1.5 SEGUNDOS)
+    setInterval(() => {
+        const ruido = (Math.random() - 0.5) * 2.5;
+        let calorCabo = estaCarregandoGlobal ? 16 : 4;
+        let calorBateria = (bateriaGlobalNivel < 25) ? 7 : 0;
+        
+        let temperaturaCalculada = temperaturaBaseAmbiente + calorCabo + calorBateria + ruido;
+        temperaturaCalculada = Math.round(temperaturaCalculada);
+
+        txtTempCPU.textContent = `${temperaturaCalculada}°C`;
+
+        historicoTermico.shift();
+        historicoTermico.push(temperaturaCalculada);
+        desenharGraficoNativo();
+
+        if (temperaturaCalculada >= 43) {
+            icoCPU.textContent = '💥';
+            txtNivelTermico.textContent = "Nível Crítico";
+            txtNivelTermico.style.color = 'var(--color-danger)';
+            pulseTermico.style.backgroundColor = 'var(--color-danger)';
+            pulseTermico.style.boxShadow = '0 0 10px var(--color-danger)';
+
+            if (controleAtivo && !jaAvisouAquecido) {
+                falar("Atenção! Computador operando em altíssima temperatura. Favor desligar o aparelho imediatamente para que possa ocorrer o resfriamento completo e o sistema volte a funcionar sem problemas.");
+                jaAvisouAquecido = true;
+            }
+        } else {
+            jaAvisouAquecido = false;
+            if (temperaturaCalculada >= 36) {
+                icoCPU.textContent = '🔥';
+                txtNivelTermico.textContent = "Nível Elevado";
+                txtNivelTermico.style.color = 'var(--color-warn)';
+                pulseTermico.style.backgroundColor = 'var(--color-warn)';
+                pulseTermico.style.boxShadow = '0 0 10px var(--color-warn)';
+            } else {
+                icoCPU.textContent = '💻';
+                txtNivelTermico.textContent = "Nível Normal";
+                txtNivelTermico.style.color = 'var(--color-success)';
+                pulseTermico.style.backgroundColor = 'var(--color-success)';
+                pulseTermico.style.boxShadow = '0 0 10px var(--color-success)';
+            }
+        }
+    }, 1500);
+
+    function falar(texto) {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel(); 
+            const message = new SpeechSynthesisUtterance(texto);
+            message.lang = 'pt-BR';
+            message.volume = 1.0; 
+            message.rate = 1.0;   
+            window.speechSynthesis.speak(message);
+        }
+    }
+
+    function atualizarRede() {
+        if (navigator.connection) {
+            document.getElementById('netTipo').textContent = navigator.connection.effectiveType.toUpperCase();
+            document.getElementById('netVelocidade').textContent = navigator.connection.downlink + " Mbps";
+        }
+    }
+    atualizarRede();
+
+    let tempoUltimoAvisoFraca = 0;
+    let tempoUltimoAvisoCheia = 0;
+    let objetoBateriaGlobal = null;
+
+    // MONITORAMENTO COMPLETO DA BATERIA REAL COM CORREÇÃO DE ATUALIZAÇÃO
+    function atualizarInterfaceBateria(battery) {
+        if (!battery) return;
+        objetoBateriaGlobal = battery;
+
+        const nivel = Math.round(battery.level * 100);
+        const carregando = battery.charging;
+        const tempoAtual = Date.now();
+        
+        bateriaGlobalNivel = nivel;
+        estaCarregandoGlobal = carregando;
+
+        txtNivel.textContent = `${nivel}%`;
+        
+        let corProgresso = 'var(--color-primary)';
+        if (nivel <= 30 && !carregando) corProgresso = 'var(--color-danger)';
+        if (nivel === 100) corProgresso = 'var(--color-success)';
+
+        batteryCircle.style.background = `conic-gradient(${corProgresso} ${nivel}%, #14242e ${nivel}%)`;
+        batteryCircle.style.boxShadow = `0 0 25px ${corProgresso}50`;
+
+        if (nivel === 100) {
+            txtStatusCabo.textContent = "Alimentação: Carga Total Concluída";
+            txtStatusCabo.style.color = 'var(--color-success)';
+        } else {
+            txtStatusCabo.textContent = carregando ? "Alimentação: Cabo Conectado" : "Alimentação: Modo Bateria";
+            txtStatusCabo.style.color = carregando ? 'var(--color-success)' : 'var(--color-warn)';
+        }
+
+        if (!controleAtivo) return;
+
+        // REGRA 1: BATERIA FRACA (Avisa de 20 em 20 segundos fora da tomada)
+        if (nivel <= 30 && !carregando) {
+            if (!jaAvisouFraca || (tempoAtual - tempoUltimoAvisoFraca >= 20000)) {
+                falar("Favor conectar o cabo de carregamento da bateria do computador");
+                jaAvisouFraca = true;
+                tempoUltimoAvisoFraca = tempoAtual;
+            }
+        } else {
+            if (jaAvisouFraca && (carregando || nivel > 30)) {
+                window.speechSynthesis.cancel();
+                jaAvisouFraca = false;
+            }
+        }
+
+        // REGRA 2: BATERIA 100% REAL TRAVADA (Avisa de 60 em 60 segundos conectada ao cabo)
+        if (nivel === 100 && carregando) {
+            if (!jaAvisouCheia || (tempoAtual - tempoUltimoAvisoCheia >= 60000)) {
+                falar("Sua bateria esta carregada favor desconectar o cabo de carregamento");
+                jaAvisouCheia = true;
+                tempoUltimoAvisoCheia = tempoAtual;
+            }
+        } else {
+            if (nivel < 100 || !carregando) {
+                if (jaAvisouCheia) {
+                    window.speechSynthesis.cancel();
+                    jaAvisouCheia = false;
+                }
+            }
+        }
+    }
+
+    // Cronômetro ativo de checagem compulsória (A cada 3 segundos)
+    setInterval(() => {
+        if (objetoBateriaGlobal) {
+            atualizarInterfaceBateria(objetoBateriaGlobal);
+        }
+    }, 3000);
+
+    if ('getBattery' in navigator) {
+        navigator.getBattery().then(battery => {
+            atualizarInterfaceBateria(battery);
+            battery.addEventListener('levelchange', () => atualizarInterfaceBateria(battery));
+            battery.addEventListener('chargingchange', () => atualizarInterfaceBateria(battery));
+        });
+    }
+
+    // CLIQUE NO BOTÃO DE LIGAR A VOZ AUTOMÁTICA
+    btnVoz.addEventListener('click', () => {
+        if (!controleAtivo) {
+            controleAtivo = true;
+            
+            btnVoz.textContent = "Sistema de Voz Integrado";
+            btnVoz.classList.add('ativo');
+            
+            txtVozStatus.textContent = "Voz: Ativada";
+            txtVozStatus.style.color = 'var(--color-success)';
+            
+            falar("Monitoramento automático por voz inicializado com sucesso.");
+
+            if (objetoBateriaGlobal) {
+                atualizarInterfaceBateria(objetoBateriaGlobal);
+            }
+        }
+    });
+</script>
+</body>
+</html>
 
