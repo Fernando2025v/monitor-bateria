@@ -1,1 +1,388 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Monitoramento - Bateria & Clima</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#0b1319',
+                        cardBg: '#0f1d24',
+                        cardBorder: '#182b35',
+                        cyanAccent: '#00e5ff',
+                        pinkAccent: '#ff3b6b',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0b1319;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+        }
+        .glow-cyan {
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+        }
+        .glow-pink {
+            box-shadow: 0 0 15px rgba(255, 59, 107, 0.3);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-4 md:p-8">
 
+    <!-- Header / Title -->
+    <header class="text-center my-4">
+        <h1 class="text-2xl md:text-4xl font-light tracking-widest text-cyan-100 uppercase">
+            Sistema de Monitoramento
+        </h1>
+        <p class="text-gray-400 text-xs md:text-sm mt-1 tracking-wider">
+            Automação de Voz Inteligente & Clima Integrado
+        </p>
+    </header>
+
+    <!-- Main Grid Dashboard -->
+    <main class="max-w-6xl mx-auto w-full grid grid-cols-1 md:grid-cols-3 gap-6 my-auto">
+        
+        <!-- CARD 1: BATERIA -->
+        <div class="bg-cardBg border border-cardBorder rounded-2xl p-6 flex flex-col items-center justify-between relative shadow-lg">
+            <div class="w-3 h-3 rounded-full bg-emerald-400 absolute top-4 right-4 animate-pulse"></div>
+            
+            <h2 class="text-gray-300 font-medium text-sm self-start mb-4">Status da Bateria</h2>
+
+            <!-- Circle Progress -->
+            <div class="relative w-44 h-44 flex items-center justify-center my-4">
+                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                    <!-- Background Circle -->
+                    <path class="text-gray-800" stroke-width="3" stroke="currentColor" fill="none"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <!-- Progress Circle -->
+                    <path id="battery-stroke" class="text-cyanAccent transition-all duration-500 ease-out" stroke-dasharray="94, 100" stroke-width="3.5" stroke-linecap="round" stroke="currentColor" fill="none"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                </svg>
+                <span id="battery-text" class="absolute text-4xl font-bold tracking-tight text-white">94%</span>
+            </div>
+
+            <!-- Status Info -->
+            <div class="text-center mt-2">
+                <p id="charging-status-text" class="text-emerald-400 font-semibold text-base mb-1">
+                    Alimentação: Cabo Conectado
+                </p>
+                <p id="voice-status-text" class="text-emerald-300 text-xs font-medium">
+                    Voz: Ativada Aut.
+                </p>
+            </div>
+        </div>
+
+        <!-- CARD 2: ELETROCARDIOGRAMA TÉRMICO -->
+        <div class="bg-cardBg border border-cardBorder rounded-2xl p-6 flex flex-col justify-between relative shadow-lg">
+            <div class="w-3 h-3 rounded-full bg-pink-500 absolute top-4 right-4 animate-pulse"></div>
+            
+            <h2 class="text-pink-400 font-medium text-sm mb-4">Eletrocardiograma Térmico</h2>
+
+            <div class="w-full h-44 bg-slate-900/60 rounded-xl overflow-hidden relative border border-slate-800 flex items-center">
+                <canvas id="ecgCanvas" class="w-full h-full"></canvas>
+            </div>
+
+            <div class="flex justify-between items-center text-xs text-gray-400 mt-4">
+                <span>Frequência: Normal</span>
+                <span class="text-pink-400 font-semibold">Monitorando...</span>
+            </div>
+        </div>
+
+        <!-- CARD 3: MÉTRICAS & CLIMA -->
+        <div class="bg-cardBg border border-cardBorder rounded-2xl p-6 flex flex-col justify-between relative shadow-lg">
+            <div class="w-3 h-3 rounded-full bg-amber-400 absolute top-4 right-4"></div>
+            
+            <h2 class="text-amber-400 font-medium text-sm mb-2">Métricas & Central de Clima</h2>
+
+            <!-- CPU & Temp -->
+            <div class="space-y-3">
+                <p class="text-gray-400 text-xs">Núcleo da CPU:</p>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-2xl">🔥</span>
+                        <span class="text-3xl font-bold text-amber-400">41°C</span>
+                    </div>
+                    <div class="flex items-center space-x-2 bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-800">
+                        <span class="text-xl">🌎</span>
+                        <span class="text-xl font-bold text-emerald-400">24°C</span>
+                        <span class="text-xs text-gray-400 ml-1">Clima Ext</span>
+                    </div>
+                </div>
+
+                <div class="inline-block bg-amber-500/20 text-amber-300 text-xs font-semibold px-2.5 py-1 rounded-md border border-amber-500/30">
+                    NÍVEL ELEVADO
+                </div>
+            </div>
+
+            <hr class="border-gray-800 my-3">
+
+            <!-- Weather Details -->
+            <div class="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                    <p class="text-gray-400">Hoje (Máx/Mín):</p>
+                    <p class="text-gray-200 font-semibold flex items-center gap-1 mt-1">
+                        <span>☀️</span> 31°C / 20°C
+                    </p>
+                </div>
+                <div>
+                    <p class="text-gray-400">Amanhã (Máx/Mín):</p>
+                    <p class="text-gray-200 font-semibold flex items-center gap-1 mt-1">
+                        <span>🔮</span> 32°C / 21°C
+                    </p>
+                </div>
+            </div>
+
+            <!-- Network Status -->
+            <div class="mt-3 pt-2 border-t border-gray-800/60 text-xs text-cyan-300">
+                Conexão: <span class="font-bold">4G</span> (10 Mbps)
+            </div>
+        </div>
+    </main>
+
+    <!-- CONTROLES DE SIMULAÇÃO E EXPLICAÇÃO DA LÓGICA -->
+    <footer class="max-w-6xl mx-auto w-full mt-6 bg-slate-900/90 border border-slate-800 rounded-2xl p-5 backdrop-blur-md">
+        <h3 class="text-sm font-semibold text-cyan-400 uppercase tracking-wider mb-3">Painel de Testes & Lógica do Assistente de Voz</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Controles -->
+            <div class="space-y-3">
+                <div class="flex items-center gap-3">
+                    <label class="text-xs text-gray-300 font-medium">Nível da Bateria:</label>
+                    <input type="range" id="battery-slider" min="5" max="100" value="94" class="w-full accent-cyan-400 cursor-pointer">
+                    <span id="slider-val" class="text-sm font-bold w-12 text-right">94%</span>
+                </div>
+
+                <div class="flex items-center justify-between bg-slate-800/80 p-2.5 rounded-xl">
+                    <span class="text-xs text-gray-200 font-medium">Cabo Conectado:</span>
+                    <button id="toggle-cable-btn" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs px-4 py-2 rounded-lg transition-colors">
+                        Sim (Desconectar)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Explicativo de como organizar seu código -->
+            <div class="text-xs text-gray-300 bg-slate-950/60 p-3 rounded-xl border border-slate-800 space-y-1">
+                <p class="text-cyan-300 font-semibold mb-1">💡 Regra da Lógica de Voz (Implementada):</p>
+                <ul class="list-disc list-inside space-y-1 text-gray-400">
+                    <li><strong class="text-gray-200">Cabo Conectado:</strong> Fala <i>"Cabo de carregamento conectado"</i> APENAS UMA VEZ. Parar o loop de alerta.</li>
+                    <li><strong class="text-gray-200">Chegou a 100%:</strong> Fala <i>"Bateria 100%. Você já pode desconectar o cabo."</i></li>
+                    <li><strong class="text-gray-200">Sem Cabo &amp; Bateria &lt; 20%:</strong> Avisa repetidamente a cada intervalo para conectar o cabo.</li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // --- ESTADO DO SISTEMA ---
+        let batteryLevel = 94;
+        let isCharging = true;
+        
+        // Flags de controle para evitar repetição de voz contínua
+        let hasAnnouncedConnected = true; // Iniciado como conectado
+        let hasAnnouncedFull = false;
+        let alertIntervalId = null;
+
+        // ELEMENTOS DOM
+        const batteryText = document.getElementById('battery-text');
+        const batteryStroke = document.getElementById('battery-stroke');
+        const chargingStatusText = document.getElementById('charging-status-text');
+        const voiceStatusText = document.getElementById('voice-status-text');
+        const batterySlider = document.getElementById('battery-slider');
+        const sliderVal = document.getElementById('slider-val');
+        const toggleCableBtn = document.getElementById('toggle-cable-btn');
+
+        // --- SISTEMA DE VOZ (Web Speech API) ---
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                // Cancelar falas anteriores pendentes para não acumular
+                window.speechSynthesis.cancel();
+
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'pt-BR';
+                utterance.rate = 1.0; // Velocidade
+                utterance.pitch = 1.0; // Tom
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // --- LÓGICA PRINCIPAL DA BATERIA E VOZ ---
+        function updateBatteryState() {
+            // Atualiza Interface Visual
+            batteryText.innerText = `${batteryLevel}%`;
+            sliderVal.innerText = `${batteryLevel}%`;
+            
+            // Atualiza círculo da SVG
+            const strokeDash = `${batteryLevel}, 100`;
+            batteryStroke.setAttribute('stroke-dasharray', strokeDash);
+
+            if (isCharging) {
+                chargingStatusText.innerText = 'Alimentação: Cabo Conectado';
+                chargingStatusText.className = 'text-emerald-400 font-semibold text-base mb-1';
+                toggleCableBtn.innerText = 'Sim (Desconectar)';
+                toggleCableBtn.className = 'bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs px-4 py-2 rounded-lg transition-colors';
+            } else {
+                chargingStatusText.innerText = 'Alimentação: Bateria (Desconectado)';
+                chargingStatusText.className = 'text-amber-400 font-semibold text-base mb-1';
+                toggleCableBtn.innerText = 'Não (Conectar Cabo)';
+                toggleCableBtn.className = 'bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-4 py-2 rounded-lg transition-colors';
+            }
+
+            // --- LÓGICA DOS ALERTAS DE VOZ ---
+            
+            // 1. QUANDO CONECTADO
+            if (isCharging) {
+                // Parar qualquer aviso periódico de "conecte o cabo"
+                if (alertIntervalId) {
+                    clearInterval(alertIntervalId);
+                    alertIntervalId = null;
+                }
+
+                // Avisa apenas UMA vez quando conecta
+                if (!hasAnnouncedConnected) {
+                    speak("Cabo de carregamento conectado.");
+                    hasAnnouncedConnected = true;
+                }
+
+                // Avisa se chegou a 100%
+                if (batteryLevel >= 100) {
+                    if (!hasAnnouncedFull) {
+                        speak("Bateria completamente carregada em 100%. Você já pode desconectar o cabo.");
+                        hasAnnouncedFull = true;
+                    }
+                } else {
+                    // Se cair de 100%, reseta para poder avisar novamente no próximo 100%
+                    hasAnnouncedFull = false;
+                }
+
+            } else {
+                // 2. QUANDO DESCONECTADO
+                hasAnnouncedConnected = false; // Reset da flag para quando reconectar futuramente
+                hasAnnouncedFull = false;
+
+                // Se a bateria estiver fraca (ex: abaixo de 20%) e desconectado
+                if (batteryLevel <= 20) {
+                    if (!alertIntervalId) {
+                        // Avisa imediatamente e depois a cada 15 segundos
+                        speak("Bateria fraca. Por favor, conecte o cabo de carregamento.");
+                        voiceStatusText.innerText = "Voz: Alerta de Cabo Desconectado!";
+                        voiceStatusText.className = "text-pink-400 text-xs font-bold animate-pulse";
+
+                        alertIntervalId = setInterval(() => {
+                            if (!isCharging && batteryLevel <= 20) {
+                                speak("Por favor, conecte o cabo de carregamento.");
+                            }
+                        }, 15000);
+                    }
+                } else {
+                    // Bateria ainda razoável, não fica incomodando
+                    if (alertIntervalId) {
+                        clearInterval(alertIntervalId);
+                        alertIntervalId = null;
+                    }
+                    voiceStatusText.innerText = "Voz: Ativada Aut.";
+                    voiceStatusText.className = "text-emerald-300 text-xs font-medium";
+                }
+            }
+        }
+
+        // EVENTOS DOS CONTROLES DA SIMULAÇÃO
+        batterySlider.addEventListener('input', (e) => {
+            batteryLevel = parseInt(e.target.value);
+            updateBatteryState();
+        });
+
+        toggleCableBtn.addEventListener('click', () => {
+            isCharging = !isCharging;
+            updateBatteryState();
+        });
+
+        // --- SIMULAÇÃO DO ECG TÉRMICO NO CANVAS ---
+        const canvas = document.getElementById('ecgCanvas');
+        const ctx = canvas.getContext('2d');
+        let x = 0;
+        let points = [];
+
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function drawECG() {
+            ctx.fillStyle = 'rgba(15, 29, 36, 0.2)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.beginPath();
+            ctx.strokeStyle = '#ff3b6b';
+            ctx.lineWidth = 2;
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = '#ff3b6b';
+
+            let midY = canvas.height / 2;
+            let y = midY + (Math.random() * 8 - 4);
+
+            // Simula espico de pulso ocasional
+            if (Math.random() < 0.05) {
+                y = midY - (Math.random() * 35 + 15);
+            }
+
+            points.push({ x: x, y: y });
+
+            if (points.length > canvas.width / 2) {
+                points.shift();
+            }
+
+            ctx.moveTo(points[0]?.x || 0, points[0]?.y || midY);
+            for (let i = 1; i < points.length; i++) {
+                ctx.lineTo(points[i].x, points[i].y);
+            }
+            ctx.stroke();
+
+            x += 2;
+            if (x > canvas.width) {
+                x = 0;
+                points = [];
+            }
+
+            requestAnimationFrame(drawECG);
+        }
+
+        // Tenta detectar a bateria real do dispositivo se o navegador suportar (API Battery status)
+        if ('getBattery' in navigator) {
+            navigator.getBattery().then(function(battery) {
+                batteryLevel = Math.round(battery.level * 100);
+                isCharging = battery.charging;
+                batterySlider.value = batteryLevel;
+                updateBatteryState();
+
+                battery.addEventListener('chargingchange', function() {
+                    isCharging = battery.charging;
+                    updateBatteryState();
+                });
+
+                battery.addEventListener('levelchange', function() {
+                    batteryLevel = Math.round(battery.level * 100);
+                    batterySlider.value = batteryLevel;
+                    updateBatteryState();
+                });
+            });
+        }
+
+        // Inicialização
+        updateBatteryState();
+        drawECG();
+    </script>
+</body>
+</html>
